@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Karyawan - Sistem Petty Cash</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>💰 Petty Cash</h2>
+                <span class="role-badge karyawan">Karyawan</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-section="ajukan">
+                    <span class="icon">📝</span> Ajukan Dana
+                </a>
+                <a href="#" class="nav-item" data-section="riwayat">
+                    <span class="icon">📋</span> Riwayat Pengajuan
+                </a>
+                <a href="#" class="nav-item" data-section="pertanggungjawaban">
+                    <span class="icon">📑</span> Pertanggungjawaban
+                </a>
+                <a href="#" class="nav-item" data-section="profil">
+                    <span class="icon">👤</span> Profil Saya
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn btn-danger btn-full" onclick="logout()">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                    <h1 id="pageTitle">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <span class="date-display" id="currentDate"></span>
+                    <div class="user-info">
+                        <span id="userName">Karyawan</span>
+                        <div class="avatar">K</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="section active">
+                    <div class="welcome-card">
+                        <h2>Selamat Datang, <span id="welcomeName">Karyawan</span>! 👋</h2>
+                        <p>Kelola pengajuan dana petty cash Anda di sini.</p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon orange">⏳</div>
+                            <div class="stat-info">
+                                <h3>Pengajuan Pending</h3>
+                                <p class="stat-value" id="myPending">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">✅</div>
+                            <div class="stat-info">
+                                <h3>Disetujui</h3>
+                                <p class="stat-value" id="myApproved">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red">❌</div>
+                            <div class="stat-info">
+                                <h3>Ditolak</h3>
+                                <p class="stat-value" id="myRejected">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon blue">💵</div>
+                            <div class="stat-info">
+                                <h3>Total Dana Diterima</h3>
+                                <p class="stat-value" id="myTotal">Rp 0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Pengajuan Terakhir</h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Keperluan</th>
+                                        <th>Jumlah</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myRecentRequests">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Ajukan Dana Section -->
+                <section id="ajukan" class="section">
+                    <div class="section-header">
+                        <h2>Ajukan Dana</h2>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="requestForm">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Tanggal Pengajuan</label>
+                                        <input type="date" id="reqDate" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Tanggal Kebutuhan</label>
+                                        <input type="date" id="reqNeededDate" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Kategori</label>
+                                    <select id="reqCategory" required>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Keperluan</label>
+                                    <input type="text" id="reqPurpose" placeholder="Keperluan pengajuan dana..." required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Jumlah yang Diajukan (Rp)</label>
+                                    <input type="number" id="reqAmount" placeholder="0" required>
+                                    <small class="text-muted">Maksimal pengajuan: <span id="maxAmount">Rp 5.000.000</span></small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Keterangan Detail</label>
+                                    <textarea id="reqDescription" rows="4" placeholder="Jelaskan detail keperluan..." required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Lampiran (Opsional)</label>
+                                    <input type="file" id="reqAttachment" accept="image/*,.pdf,.doc,.docx">
+                                    <small class="text-muted">Format: JPG, PNG, PDF, DOC (Max 5MB)</small>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="reset" class="btn btn-secondary">Reset</button>
+                                    <button type="submit" class="btn btn-primary">📤 Ajukan Dana</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Riwayat Pengajuan Section -->
+                <section id="riwayat" class="section">
+                    <div class="section-header">
+                        <h2>Riwayat Pengajuan</h2>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="all">Semua</button>
+                        <button class="tab-btn" data-tab="pending">Pending</button>
+                        <button class="tab-btn" data-tab="approved">Disetujui</button>
+                        <button class="tab-btn" data-tab="rejected">Ditolak</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Tanggal</th>
+                                        <th>Keperluan</th>
+                                        <th>Kategori</th>
+                                        <th>Jumlah</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myRequestList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pertanggungjawaban Section -->
+                <section id="pertanggungjawaban" class="section">
+                    <div class="section-header">
+                        <h2>Pertanggungjawaban Dana</h2>
+                    </div>
+
+                    <div class="info-box warning">
+                        <p>⚠️ Setiap dana yang disetujui wajib dipertanggungjawabkan dengan bukti penggunaan.</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Dana yang Perlu Dipertanggungjawabkan</h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal Disetujui</th>
+                                        <th>Keperluan</th>
+                                        <th>Jumlah</th>
+                                        <th>Batas Waktu</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="accountabilityList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Profil Section -->
+                <section id="profil" class="section">
+                    <div class="section-header">
+                        <h2>Profil Saya</h2>
+                    </div>
+
+                    <div class="profile-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>👤 Informasi Profil</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="profileForm">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>NIP</label>
+                                            <input type="text" id="profNip" readonly>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Nama Lengkap</label>
+                                            <input type="text" id="profName">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>Email</label>
+                                            <input type="email" id="profEmail">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>No. HP</label>
+                                            <input type="tel" id="profPhone">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Departemen</label>
+                                        <input type="text" id="profDept" readonly>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>🔐 Ubah Password</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="changePasswordForm">
+                                    <div class="form-group">
+                                        <label>Password Lama</label>
+                                        <input type="password" id="oldPwd" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Password Baru</label>
+                                        <input type="password" id="newPwd" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Konfirmasi Password Baru</label>
+                                        <input type="password" id="confirmPwd" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Ubah Password</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Detail Request -->
+    <div class="modal" id="detailRequestModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detail Pengajuan</h3>
+                <button class="close-btn" onclick="closeModal('detailRequest')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-grid" id="requestDetail">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('detailRequest')">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pertanggungjawaban -->
+    <div class="modal" id="accountabilityModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Form Pertanggungjawaban</h3>
+                <button class="close-btn" onclick="closeModal('accountability')">&times;</button>
+            </div>
+            <form id="accountabilityForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Jumlah yang Digunakan (Rp)</label>
+                        <input type="number" id="accUsedAmount" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Keterangan Penggunaan</label>
+                        <textarea id="accDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Bukti (Nota/Kwitansi)</label>
+                        <input type="file" id="accReceipt" accept="image/*,.pdf" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sisa Dana (jika ada)</label>
+                        <input type="number" id="accRemainder" value="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('accountability')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Kirim Pertanggungjawaban</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Check auth
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser || currentUser.role !== 'karyawan') {
+            window.location.href = 'index.html';
+        }
+        document.getElementById('userName').textContent = currentUser.name;
+        document.getElementById('welcomeName').textContent = currentUser.name;
+        initKaryawan();
+    </script>
+</body>
+</html>

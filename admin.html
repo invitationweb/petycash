@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Sistem Petty Cash</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>💰 Petty Cash</h2>
+                <span class="role-badge admin">Admin</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <span class="icon">📊</span> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-section="transaksi">
+                    <span class="icon">💸</span> Transaksi
+                </a>
+                <a href="#" class="nav-item" data-section="pengajuan">
+                    <span class="icon">📝</span> Pengajuan
+                </a>
+                <a href="#" class="nav-item" data-section="karyawan">
+                    <span class="icon">👥</span> Data Karyawan
+                </a>
+                <a href="#" class="nav-item" data-section="kategori">
+                    <span class="icon">🏷️</span> Kategori
+                </a>
+                <a href="#" class="nav-item" data-section="laporan">
+                    <span class="icon">📈</span> Laporan
+                </a>
+                <a href="#" class="nav-item" data-section="pengaturan">
+                    <span class="icon">⚙️</span> Pengaturan
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn btn-danger btn-full" onclick="logout()">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                    <h1 id="pageTitle">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <span class="date-display" id="currentDate"></span>
+                    <div class="user-info">
+                        <span id="userName">Administrator</span>
+                        <div class="avatar">A</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon blue">💵</div>
+                            <div class="stat-info">
+                                <h3>Saldo Kas</h3>
+                                <p class="stat-value" id="saldoKas">Rp 0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon green">📥</div>
+                            <div class="stat-info">
+                                <h3>Total Pemasukan</h3>
+                                <p class="stat-value" id="totalPemasukan">Rp 0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon red">📤</div>
+                            <div class="stat-info">
+                                <h3>Total Pengeluaran</h3>
+                                <p class="stat-value" id="totalPengeluaran">Rp 0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon orange">⏳</div>
+                            <div class="stat-info">
+                                <h3>Pengajuan Pending</h3>
+                                <p class="stat-value" id="pendingCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Transaksi Terbaru</h3>
+                                <a href="#" class="btn btn-sm" data-section="transaksi">Lihat Semua</a>
+                            </div>
+                            <div class="card-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tanggal</th>
+                                            <th>Keterangan</th>
+                                            <th>Jenis</th>
+                                            <th>Jumlah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentTransactions">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Pengajuan Terbaru</h3>
+                                <a href="#" class="btn btn-sm" data-section="pengajuan">Lihat Semua</a>
+                            </div>
+                            <div class="card-body">
+                                <div id="recentRequests"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Transaksi Section -->
+                <section id="transaksi" class="section">
+                    <div class="section-header">
+                        <h2>Manajemen Transaksi</h2>
+                        <button class="btn btn-primary" onclick="openModal('addTransaksi')">+ Tambah Transaksi</button>
+                    </div>
+                    
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>Tanggal Mulai:</label>
+                            <input type="date" id="filterStartDate">
+                        </div>
+                        <div class="filter-group">
+                            <label>Tanggal Akhir:</label>
+                            <input type="date" id="filterEndDate">
+                        </div>
+                        <div class="filter-group">
+                            <label>Jenis:</label>
+                            <select id="filterJenis">
+                                <option value="">Semua</option>
+                                <option value="masuk">Pemasukan</option>
+                                <option value="keluar">Pengeluaran</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-secondary" onclick="filterTransaksi()">🔍 Filter</button>
+                        <button class="btn btn-outline" onclick="resetFilter()">↺ Reset</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table" id="transaksiTable">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Tanggal</th>
+                                        <th>Keterangan</th>
+                                        <th>Kategori</th>
+                                        <th>Jenis</th>
+                                        <th>Jumlah</th>
+                                        <th>Saldo</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaksiList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pengajuan Section -->
+                <section id="pengajuan" class="section">
+                    <div class="section-header">
+                        <h2>Pengajuan Dana Karyawan</h2>
+                    </div>
+
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="pending">Pending</button>
+                        <button class="tab-btn" data-tab="approved">Disetujui</button>
+                        <button class="tab-btn" data-tab="rejected">Ditolak</button>
+                        <button class="tab-btn" data-tab="all">Semua</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Tanggal</th>
+                                        <th>Karyawan</th>
+                                        <th>Keperluan</th>
+                                        <th>Kategori</th>
+                                        <th>Jumlah</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pengajuanList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Karyawan Section -->
+                <section id="karyawan" class="section">
+                    <div class="section-header">
+                        <h2>Data Karyawan</h2>
+                        <button class="btn btn-primary" onclick="openModal('addKaryawan')">+ Tambah Karyawan</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>NIP</th>
+                                        <th>Nama</th>
+                                        <th>Departemen</th>
+                                        <th>Email</th>
+                                        <th>No. HP</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="karyawanList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Kategori Section -->
+                <section id="kategori" class="section">
+                    <div class="section-header">
+                        <h2>Kategori Pengeluaran</h2>
+                        <button class="btn btn-primary" onclick="openModal('addKategori')">+ Tambah Kategori</button>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Kode</th>
+                                        <th>Nama Kategori</th>
+                                        <th>Deskripsi</th>
+                                        <th>Batas Anggaran</th>
+                                        <th>Terpakai</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="kategoriList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Laporan Section -->
+                <section id="laporan" class="section">
+                    <div class="section-header">
+                        <h2>Laporan</h2>
+                    </div>
+
+                    <div class="report-filters">
+                        <div class="filter-group">
+                            <label>Jenis Laporan:</label>
+                            <select id="reportType">
+                                <option value="harian">Harian</option>
+                                <option value="mingguan">Mingguan</option>
+                                <option value="bulanan" selected>Bulanan</option>
+                                <option value="tahunan">Tahunan</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Bulan:</label>
+                            <input type="month" id="reportMonth">
+                        </div>
+                        <button class="btn btn-primary" onclick="generateReport()">📊 Generate Laporan</button>
+                        <button class="btn btn-success" onclick="exportReport()">📥 Export Excel</button>
+                        <button class="btn btn-secondary" onclick="printReport()">🖨️ Print</button>
+                    </div>
+
+                    <div class="report-summary">
+                        <div class="summary-card">
+                            <h4>Total Pemasukan</h4>
+                            <p class="amount green" id="reportPemasukan">Rp 0</p>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Total Pengeluaran</h4>
+                            <p class="amount red" id="reportPengeluaran">Rp 0</p>
+                        </div>
+                        <div class="summary-card">
+                            <h4>Selisih</h4>
+                            <p class="amount blue" id="reportSelisih">Rp 0</p>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Detail Transaksi</h3>
+                        </div>
+                        <div class="card-body">
+                            <table class="table" id="reportTable">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Tanggal</th>
+                                        <th>Keterangan</th>
+                                        <th>Kategori</th>
+                                        <th>Debit</th>
+                                        <th>Kredit</th>
+                                        <th>Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportList">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pengaturan Section -->
+                <section id="pengaturan" class="section">
+                    <div class="section-header">
+                        <h2>Pengaturan Sistem</h2>
+                    </div>
+
+                    <div class="settings-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>⚙️ Pengaturan Umum</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="settingsForm">
+                                    <div class="form-group">
+                                        <label>Nama Perusahaan</label>
+                                        <input type="text" id="companyName" value="PT. Contoh Indonesia">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Saldo Awal Kas</label>
+                                        <input type="number" id="initialBalance" value="10000000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Batas Pengajuan per Transaksi</label>
+                                        <input type="number" id="maxRequest" value="5000000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Notifikasi Email</label>
+                                        <label class="switch">
+                                            <input type="checkbox" id="emailNotif" checked>
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Simpan Pengaturan</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>🔐 Keamanan</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="passwordForm">
+                                    <div class="form-group">
+                                        <label>Password Lama</label>
+                                        <input type="password" id="oldPassword">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Password Baru</label>
+                                        <input type="password" id="newPassword">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Konfirmasi Password</label>
+                                        <input type="password" id="confirmPassword">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Ubah Password</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>💾 Backup & Restore</h3>
+                            </div>
+                            <div class="card-body">
+                                <p>Backup data sistem untuk keamanan.</p>
+                                <button class="btn btn-success" onclick="backupData()">📥 Backup Data</button>
+                                <button class="btn btn-warning" onclick="restoreData()">📤 Restore Data</button>
+                                <button class="btn btn-danger" onclick="resetData()">🗑️ Reset Data</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Add Transaksi -->
+    <div class="modal" id="addTransaksiModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tambah Transaksi</h3>
+                <button class="close-btn" onclick="closeModal('addTransaksi')">&times;</button>
+            </div>
+            <form id="transaksiForm">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tanggal</label>
+                            <input type="date" id="trxDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Jenis Transaksi</label>
+                            <select id="trxType" required>
+                                <option value="masuk">Pemasukan</option>
+                                <option value="keluar">Pengeluaran</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori</label>
+                        <select id="trxCategory" required>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Jumlah (Rp)</label>
+                        <input type="number" id="trxAmount" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Keterangan</label>
+                        <textarea id="trxDescription" rows="3" placeholder="Keterangan transaksi..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Bukti Transaksi (Opsional)</label>
+                        <input type="file" id="trxReceipt" accept="image/*,.pdf">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addTransaksi')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Add Karyawan -->
+    <div class="modal" id="addKaryawanModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tambah Karyawan</h3>
+                <button class="close-btn" onclick="closeModal('addKaryawan')">&times;</button>
+            </div>
+            <form id="karyawanForm">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>NIP</label>
+                            <input type="text" id="empNip" placeholder="NIP001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Lengkap</label>
+                            <input type="text" id="empName" placeholder="Nama lengkap" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="empEmail" placeholder="email@company.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>No. HP</label>
+                            <input type="tel" id="empPhone" placeholder="08xxxxxxxxxx" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Departemen</label>
+                            <select id="empDept" required>
+                                <option value="IT">IT</option>
+                                <option value="Finance">Finance</option>
+                                <option value="HR">HR</option>
+                                <option value="Marketing">Marketing</option>
+                                <option value="Operations">Operations</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="empStatus" required>
+                                <option value="aktif">Aktif</option>
+                                <option value="nonaktif">Non-Aktif</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="empUsername" placeholder="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="empPassword" placeholder="password" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addKaryawan')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Add Kategori -->
+    <div class="modal" id="addKategoriModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Tambah Kategori</h3>
+                <button class="close-btn" onclick="closeModal('addKategori')">&times;</button>
+            </div>
+            <form id="kategoriForm">
+                <div class="modal-body">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Kode Kategori</label>
+                            <input type="text" id="catCode" placeholder="KAT001" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Kategori</label>
+                            <input type="text" id="catName" placeholder="Nama kategori" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Deskripsi</label>
+                        <textarea id="catDesc" rows="2" placeholder="Deskripsi kategori..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Batas Anggaran Bulanan (Rp)</label>
+                        <input type="number" id="catBudget" placeholder="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addKategori')">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Approval -->
+    <div class="modal" id="approvalModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Detail Pengajuan</h3>
+                <button class="close-btn" onclick="closeModal('approval')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-grid" id="approvalDetail">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" onclick="rejectRequest()">❌ Tolak</button>
+                <button type="button" class="btn btn-success" onclick="approveRequest()">✅ Setujui</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Check auth
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser || currentUser.role !== 'admin') {
+            window.location.href = 'index.html';
+        }
+        document.getElementById('userName').textContent = currentUser.name;
+        initAdmin();
+    </script>
+</body>
+</html>
